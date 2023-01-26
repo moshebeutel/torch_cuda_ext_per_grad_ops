@@ -2,7 +2,7 @@ import torch
 from torch import nn
 import torch.optim as optim
 from tqdm import tqdm
-from per_sample_grad import get_per_sample_grads
+from per_sample_grad import apply_along_axis, get_per_sample_grads
 
 
 LOG = {}
@@ -37,7 +37,7 @@ def train_single_epoch(trainloader, net, criterion, optimizer,
             per_sample_grads = get_per_sample_grads(net=net, criterion=criterion, labels=labels, inputs=inputs)
             for ii,p in enumerate(net.parameters()):
                 g = per_sample_grads[ii].detach()
-                p.grad = grads_manipulation(g)
+                p.grad = apply_along_axis(func1d=grads_manipulation, axis=0, arr=g)
         
 
         ## sign sgd
