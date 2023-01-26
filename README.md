@@ -1,4 +1,4 @@
-# CUDA Project - Implement `Pytorch` Missing Per-Gradient Operations
+# CUDA Project - Implement `Pytorch` Missing Per-Sample-Gradient Operations
 
 
 ## Overview
@@ -24,7 +24,7 @@ Thus, Differential Privacy uses the the gradients calculated per example and not
 Luckily, the per sample gradients are available using existing differential privacy libraries but other manipulations, among them those that are currently researched ofcourse,  are missing.
 
 ## Task Overview
-Given  neural network parameters, the gradients are calculated at each batch for the whole batch. For  the pupuse of differential privacy we would like to preform some per gradients operations:
+Given  neural network parameters, the gradients are calculated at each batch for the whole batch. For  the pupuse of differential privacy we would like to preform some per sample gradients operations:
 1. Compute the **mean** of gradient along the batch axis.
 2. Compute the **standard deviation** of gradients along the batch axis.
 3. Compute the **median** of gradients along the batch axis.
