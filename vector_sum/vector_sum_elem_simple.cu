@@ -114,11 +114,11 @@ int main() {
     // print host result vs device result
     printf("\n\n\n");
     printf("Vector.sum() Host\n");
-    printf("******************");
+    printf("******************\n");
     printSrcSum(h_v, hostRefSum, nElem);
     printf("\n\n\n");
     printf("Vector.sum() Device\n");
-    printf("******************");
+    printf("******************\n");
     printSrcSum(h_v, gpuRefSum, nElem);
     printf("\n\n\n");
     // check results
