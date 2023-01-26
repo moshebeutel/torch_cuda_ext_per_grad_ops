@@ -24,7 +24,8 @@ def main():
     
     train_method(trainloader=trainloader,
                  testloader=testloader, net=net, criterion=criterion,
-                 optimizer=optimizer, epochs=EPOCHS, device=device)  
+                 optimizer=optimizer, epochs=EPOCHS, device=device,
+                 grads_manipulation=lambda g: g.mean(dim=0))  
 
 
 if __name__=='__main__':

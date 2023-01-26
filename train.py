@@ -15,7 +15,8 @@ def get_loss_and_opt(net, learning_rate):
     return criterion, optimizer
 
 
-def train_single_epoch(trainloader, net, criterion, optimizer, device, grads_manipulation = None):
+def train_single_epoch(trainloader, net, criterion, optimizer, 
+                       device, grads_manipulation = None):
     net.train()
 
     for i, data in enumerate(trainloader, 0):
@@ -72,12 +73,16 @@ def eval_net(testloader, net, device):
 
 
 
-def train_method(trainloader, testloader, net, criterion, optimizer, epochs=50, device='cpu'):
+def train_method(trainloader,
+                 testloader, 
+                 net, criterion, optimizer, epochs=50, device='cpu', grads_manipulation=None):
 
     prog_bar = tqdm(range(epochs))
     for epoch in prog_bar:
 
-        train_single_epoch(trainloader=trainloader, net=net, criterion=criterion, optimizer=optimizer, device=device, grads_manipulation=lambda g: g.mean(dim=0))  
+        train_single_epoch(trainloader=trainloader, net=net, criterion=criterion, 
+                           optimizer=optimizer, device=device, 
+                           grads_manipulation=grads_manipulation)  
         eval_net(testloader=testloader, net=net, device=device)
 
         val_acc = LOG['val_acc']
