@@ -21,21 +21,9 @@ def main():
     net = MlpNet().to(device)  
 
     criterion, optimizer = get_loss_and_opt(net, learning_rate=LEARNING_RATE)
- 
-    # privacy_engine = PrivacyEngine()
-    # priv_model, priv_optimizer, priv_loader = privacy_engine.make_private(
-    #     module=net,
-    #     optimizer=optimizer,
-    #     data_loader=trainloader,
-    #     noise_multiplier=1.1,
-    #     max_grad_norm=1.0,
-    # )
-
-    # train_method(trainloader=priv_loader, testloader=testloader, net=priv_model, criterion=criterion,
-    #              optimizer=priv_optimizer, epochs=EPOCHS)  
-
     
-    train_method(trainloader=trainloader, testloader=testloader, net=net, criterion=criterion,
+    train_method(trainloader=trainloader,
+                 testloader=testloader, net=net, criterion=criterion,
                  optimizer=optimizer, epochs=EPOCHS, device=device)  
 
 

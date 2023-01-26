@@ -30,3 +30,9 @@ Given  neural network parameters, the gradients are calculated at each batch for
 3. Compute the **median** of gradients along the batch axis.
 4. Remove gradient **outliars**  along the batch axis.
 5. Compute a **weighted sum** of the gradients along the batch axis where the weights are the probability density of the gradient value by the Gaussian defined by the mean and standard deviation calculated in 1. and 2. 
+6. **Clip** each gradient before taking the mean\median. 
+7. Take gradient **sign** instead of its value. 
+8. Get the per-sample-gradients and batch gradient for the same forward pass function.
+
+## Future Plan
+`Pytorch` contain the ability to be extended by the users. This is done using cpp extensions and CUDA integration. This allows to integrate  our implementd features into `Pytorch` as  built-in functions. 
