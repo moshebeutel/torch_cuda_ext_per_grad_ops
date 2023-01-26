@@ -1,19 +1,7 @@
 
-#include "../common/common.h"
+#include "../utils/utils.h"
 #include <cuda_runtime.h>
 #include <stdio.h>
-
-
-#define CHECK(call)                                                            \
-{                                                                              \
-    const cudaError_t error = call;                                            \
-    if (error != cudaSuccess)                                                  \
-    {                                                                          \
-        fprintf(stderr, "Error: %s:%d, ", __FILE__, __LINE__);                 \
-        fprintf(stderr, "code: %d, reason: %s\n", error,                       \
-                cudaGetErrorString(error));                                    \
-    }                                                                          \
-}
 
 
 int main() {
@@ -29,9 +17,9 @@ int main() {
     }
 
     int dev = 0, driverVersion = 0, runtimeVersion = 0;
-    CHECK(cudaSetDevice(dev));
+    ERR_SAFE(cudaSetDevice(dev));
     cudaDeviceProp deviceProp;
-    CHECK(cudaGetDeviceProperties(&deviceProp, dev));
+    ERR_SAFE(cudaGetDeviceProperties(&deviceProp, dev));
     printf("Device %d: \"%s\"\n", dev, deviceProp.name);
 
     cudaDriverGetVersion(&driverVersion);

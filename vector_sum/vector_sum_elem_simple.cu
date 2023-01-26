@@ -1,4 +1,4 @@
-#include "../common/common.h"
+#include "../utils/utils.h"
 #include <cuda_runtime.h>
 #include <stdio.h>
 
@@ -44,9 +44,9 @@ int main() {
     // set up device
     int dev = 0;
     cudaDeviceProp deviceProp;
-    CHECK(cudaGetDeviceProperties(&deviceProp, dev));
+    ERR_SAFE(cudaGetDeviceProperties(&deviceProp, dev));
     printf("Using Device %d: %s\n", dev, deviceProp.name);
-    CHECK(cudaSetDevice(dev));
+    ERR_SAFE(cudaSetDevice(dev));
 
     // set up data size of vectors
     // int nElem = 1 << 24;
@@ -65,31 +65,31 @@ int main() {
     double iStart, iElaps;
 
     // initialize data at host side
-    iStart = seconds();
+    iStart = time_of_day_seconds();
     initialData(h_v, nElem);
-    iElaps = seconds() - iStart;
+    iElaps = time_of_day_seconds() - iStart;
     printf("initialData Time elapsed %f sec\n", iElaps);
     memset(hostRefSum, 0, nBytes);
     memset(gpuRefSum, 0, nBytes);
     printf("Host memory allocated %d bytes\n", (int)nBytes);
 
     // add vector at host side for result checks
-    iStart = seconds();
+    iStart = time_of_day_seconds();
     sumElemArrayOnHost(h_v, hostRefSum, nElem);
-    iElaps = seconds() - iStart;
+    iElaps = time_of_day_seconds() - iStart;
     printf("sumElemArrayOnHost Time elapsed %f sec\n", iElaps);
 
     // malloc device global memory
     float *d_v;
     printf("Device memory shall allocate %d bytes\n", (int)(nBytes));
-    CHECK(cudaMalloc(&d_v, nBytes));
+    ERR_SAFE(cudaMalloc(&d_v, nBytes));
     // CHECK(cudaMalloc((float **) &d_v, nBytes));
     // CHECK(cudaMalloc((float **) &d_sum, sizeof(float)));
     printf("Device memory allocated\n");
 
 
     // transfer data from host to device
-    CHECK(cudaMemcpy(d_v, h_v, nBytes, cudaMemcpyHostToDevice));
+    ERR_SAFE(cudaMemcpy(d_v, h_v, nBytes, cudaMemcpyHostToDevice));
     // CHECK(cudaMemcpy(d_sum, gpuRefSum, sizeof(float), cudaMemcpyHostToDevice));
 
     // invoke kernel at host side
@@ -97,18 +97,18 @@ int main() {
     dim3 block(iLen);
     dim3 grid((nElem + block.x - 1) / block.x);
 
-    iStart = seconds();
+    iStart = time_of_day_seconds();
     sumElemArrayOnGPU<<<grid, block>>>(d_v, nElem);
-    CHECK(cudaDeviceSynchronize());
-    iElaps = seconds() - iStart;
+    ERR_SAFE(cudaDeviceSynchronize());
+    iElaps = time_of_day_seconds() - iStart;
     printf("sumElemArrayOnGPU <<<  %d, %d  >>>  Time elapsed %f sec\n", grid.x,
            block.x, iElaps);
 
     // check kernel error
-    CHECK(cudaGetLastError());
+    ERR_SAFE(cudaGetLastError());
 
     // copy kernel result back to host side
-    CHECK(cudaMemcpy(gpuRefSum, d_v, sizeof(float), cudaMemcpyDeviceToHost));
+    ERR_SAFE(cudaMemcpy(gpuRefSum, d_v, sizeof(float), cudaMemcpyDeviceToHost));
 
 
     // print host result vs device result
@@ -125,7 +125,7 @@ int main() {
     checkResult(hostRefSum, gpuRefSum);
     printf("\n\n\n");
     // free device global memory
-    CHECK(cudaFree(d_v));
+    ERR_SAFE(cudaFree(d_v));
     // CHECK(cudaFree(d_sum));
 
     // free host memory

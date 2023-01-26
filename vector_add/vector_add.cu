@@ -1,4 +1,4 @@
-#include "../common/common.h"
+#include "../utils/common.h"
 #include <cuda_runtime.h>
 #include <stdio.h>
 
@@ -51,9 +51,9 @@ int main() {
     // set up device
     int dev = 0;
     cudaDeviceProp deviceProp;
-    CHECK(cudaGetDeviceProperties(&deviceProp, dev));
+    ERR_SAFE(cudaGetDeviceProperties(&deviceProp, dev));
     printf("Using Device %d: %s\n", dev, deviceProp.name);
-    CHECK(cudaSetDevice(dev));
+    ERR_SAFE(cudaSetDevice(dev));
 
     // set up data size of vectors
     int nElem = 1 << 24;
@@ -87,14 +87,14 @@ int main() {
 
     // malloc device global memory
     float *d_A, *d_B, *d_C;
-    CHECK(cudaMalloc((float **) &d_A, nBytes));
-    CHECK(cudaMalloc((float **) &d_B, nBytes));
-    CHECK(cudaMalloc((float **) &d_C, nBytes));
+    ERR_SAFE(cudaMalloc((float **) &d_A, nBytes));
+    ERR_SAFE(cudaMalloc((float **) &d_B, nBytes));
+    ERR_SAFE(cudaMalloc((float **) &d_C, nBytes));
 
     // transfer data from host to device
-    CHECK(cudaMemcpy(d_A, h_A, nBytes, cudaMemcpyHostToDevice));
-    CHECK(cudaMemcpy(d_B, h_B, nBytes, cudaMemcpyHostToDevice));
-    CHECK(cudaMemcpy(d_C, gpuRef, nBytes, cudaMemcpyHostToDevice));
+    ERR_SAFE(cudaMemcpy(d_A, h_A, nBytes, cudaMemcpyHostToDevice));
+    ERR_SAFE(cudaMemcpy(d_B, h_B, nBytes, cudaMemcpyHostToDevice));
+    ERR_SAFE(cudaMemcpy(d_C, gpuRef, nBytes, cudaMemcpyHostToDevice));
 
     // invoke kernel at host side
     int iLen = 512;
@@ -103,24 +103,24 @@ int main() {
 
     iStart = seconds();
     pairSortArrayOnGPU<<<grid, block>>>(d_A, d_B, d_C, nElem);
-    CHECK(cudaDeviceSynchronize());
+    ERR_SAFE(cudaDeviceSynchronize());
     iElaps = seconds() - iStart;
     printf("sumArraysOnGPU <<<  %d, %d  >>>  Time elapsed %f sec\n", grid.x,
            block.x, iElaps);
 
     // check kernel error
-    CHECK(cudaGetLastError());
+    ERR_SAFE(cudaGetLastError());
 
     // copy kernel result back to host side
-    CHECK(cudaMemcpy(gpuRef, d_C, nBytes, cudaMemcpyDeviceToHost));
+    ERR_SAFE(cudaMemcpy(gpuRef, d_C, nBytes, cudaMemcpyDeviceToHost));
 
     // check device results
     checkResult(hostRef, gpuRef, nElem);
 
     // free device global memory
-    CHECK(cudaFree(d_A));
-    CHECK(cudaFree(d_B));
-    CHECK(cudaFree(d_C));
+    ERR_SAFE(cudaFree(d_A));
+    ERR_SAFE(cudaFree(d_B));
+    ERR_SAFE(cudaFree(d_C));
 
     // free host memory
     free(h_A);

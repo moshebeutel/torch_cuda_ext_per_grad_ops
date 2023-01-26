@@ -1,9 +1,9 @@
-#ifndef PROFESIONAL_CUDA_COMMON_H
-#define PROFESIONAL_CUDA_COMMON_H
+#ifndef UTILS_H
+#define UTILS_H
 
 #include <sys/time.h>
 
-#define CHECK(call)                                                            \
+#define ERR_SAFE(call)                                                            \
 {                                                                              \
     const cudaError_t error = call;                                            \
     if (error != cudaSuccess)                                                  \
@@ -15,7 +15,7 @@
 }
 
 
-inline double seconds() {
+inline double time_of_day_seconds() {
     struct timeval tp;
     struct timezone tzp;
     int i = gettimeofday(&tp, &tzp);
@@ -23,4 +23,4 @@ inline double seconds() {
 }
 
 
-#endif //PROFESIONAL_CUDA_COMMON_H
+#endif //UTILS_H

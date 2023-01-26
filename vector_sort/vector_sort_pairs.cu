@@ -1,4 +1,4 @@
-#include "../common/common.h"
+#include "../utils/utils.h"
 #include <cuda_runtime.h>
 #include <stdio.h>
 
@@ -73,9 +73,9 @@ int main() {
     // set up device
     int dev = 0;
     cudaDeviceProp deviceProp;
-    CHECK(cudaGetDeviceProperties(&deviceProp, dev));
+    ERR_SAFE(cudaGetDeviceProperties(&deviceProp, dev));
     printf("Using Device %d: %s\n", dev, deviceProp.name);
-    CHECK(cudaSetDevice(dev));
+    ERR_SAFE(cudaSetDevice(dev));
 
     // set up data size of vectors
     // int nElem = 1 << 24;
@@ -94,45 +94,45 @@ int main() {
     double iStart, iElaps;
 
     // initialize data at host side
-    iStart = seconds();
+    iStart = time_of_day_seconds();
     initialData(h_src, nElem);
-    iElaps = seconds() - iStart;
+    iElaps = time_of_day_seconds() - iStart;
     printf("initialData Time elapsed %f sec\n", iElaps);
     memset(hostRefSorted, 0, nBytes);
     memset(gpuRefSorted, 0, nBytes);
 
     // add vector at host side for result checks
-    iStart = seconds();
+    iStart = time_of_day_seconds();
     pairSortArraysOnHost(h_src, hostRefSorted, nElem);
-    iElaps = seconds() - iStart;
+    iElaps = time_of_day_seconds() - iStart;
     printf("pairSortArraysOnHost Time elapsed %f sec\n", iElaps);
 
     // malloc device global memory
     float *d_src, *d_sorted;
-    CHECK(cudaMalloc((float **) &d_src, nBytes));
-    CHECK(cudaMalloc((float **) &d_sorted, nBytes));
+    ERR_SAFE(cudaMalloc((float **) &d_src, nBytes));
+    ERR_SAFE(cudaMalloc((float **) &d_sorted, nBytes));
 
     // transfer data from host to device
-    CHECK(cudaMemcpy(d_src, h_src, nBytes, cudaMemcpyHostToDevice));
-    CHECK(cudaMemcpy(d_sorted, gpuRefSorted, nBytes, cudaMemcpyHostToDevice));
+    ERR_SAFE(cudaMemcpy(d_src, h_src, nBytes, cudaMemcpyHostToDevice));
+    ERR_SAFE(cudaMemcpy(d_sorted, gpuRefSorted, nBytes, cudaMemcpyHostToDevice));
 
     // invoke kernel at host side
     int iLen = nElem;
     dim3 block(iLen);
     dim3 grid((nElem + block.x - 1) / block.x);
 
-    iStart = seconds();
+    iStart = time_of_day_seconds();
     pairSortArrayOnGPU<<<grid, block>>>(d_src, d_sorted, nElem);
-    CHECK(cudaDeviceSynchronize());
-    iElaps = seconds() - iStart;
+    ERR_SAFE(cudaDeviceSynchronize());
+    iElaps = time_of_day_seconds() - iStart;
     printf("pairSortArrayOnGPU <<<  %d, %d  >>>  Time elapsed %f sec\n", grid.x,
            block.x, iElaps);
 
     // check kernel error
-    CHECK(cudaGetLastError());
+    ERR_SAFE(cudaGetLastError());
 
     // copy kernel result back to host side
-    CHECK(cudaMemcpy(gpuRefSorted, d_sorted, nBytes, cudaMemcpyDeviceToHost));
+    ERR_SAFE(cudaMemcpy(gpuRefSorted, d_sorted, nBytes, cudaMemcpyDeviceToHost));
 
     // check device results
     checkResult(hostRefSorted, gpuRefSorted, nElem);
@@ -144,8 +144,8 @@ int main() {
     printSrcSorted(h_src, gpuRefSorted, nElem);
 
     // free device global memory
-    CHECK(cudaFree(d_src));
-    CHECK(cudaFree(d_sorted));
+    ERR_SAFE(cudaFree(d_src));
+    ERR_SAFE(cudaFree(d_sorted));
 
     // free host memory
     free(h_src);
